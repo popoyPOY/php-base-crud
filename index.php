@@ -5,12 +5,14 @@ include './response.php';
 
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
- 
- 
+
     if (count($_GET) != 0) {
-        $param = $_GET["id"];
-        $sql = "SELECT * FROM students WHERE id = ".$param."";
-        
+        $param = $_GET["search"];
+
+        list($first_name, $last_name) = explode(' ', $param);
+
+        $sql = "SELECT * FROM `students` WHERE students.first_name = '{$first_name}' OR last_name = '{$last_name}'";
+
         $data = Query($sql)->fetch_all();
 
         if ($data) {
@@ -23,17 +25,17 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
         }
     }
  
-    else {
- 
-        $sql = "SELECT * FROM students";
- 
-        $data = Query($sql)->fetch_all();
- 
-        foreach($data as $row) {
-            echo "<h1>id: " . $row[0]. " - school_id: " . $row[1]. " " . $row[2]. " ".$row[3]." ".$row[4]." birthday: ".$row[5]." gender: ".$row[6]." course: ".$row[7]." year: ".$row[8]." <br>";
+        else {
+    
+            $sql = "SELECT * FROM students";
+    
+            $data = Query($sql)->fetch_all();
+    
+            foreach($data as $row) {
+                echo "<h1>id: " . $row[0]. " - school_id: " . $row[1]. " " . $row[2]. " ".$row[3]." ".$row[4]." birthday: ".$row[5]." gender: ".$row[6]." course: ".$row[7]." year: ".$row[8]." <br>";
+            }
+    
         }
- 
-    }
  
 }
  
@@ -46,8 +48,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
         $sql = "INSERT INTO students (id, school_id, first_name, middle_initial, last_name, birthday, gender, course, year) VALUES (NULL, {$data["school_id"]}, '{$data["first_name"]}', '{$data["middle_initial"]}', '{$data["last_name"]}', '{$data["birthday"]}', '{$data["gender"]}', '{$data["course"]}', '{$data["year"]}' )";
-
-
 
         $query = Query($sql);
 
@@ -113,6 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
         }
     }
     else {
+        http_response_code(404);
         echo "THIS BRO NOT EXIST";
     }
 }

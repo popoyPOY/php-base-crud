@@ -1,14 +1,16 @@
 <?php
 
+const HOST = "127.0.0.1";
+const USERNAME = "root";
+const PASSWORD = "";
+const SERVERNAME = "student_info";
+
 
 function Query($sql) {
-    $HOST = "127.0.0.1";
-    $USERNAME = "root";
-    $PASSWORD = "";
-    $SERVERNAME = "student_info";
 
 
-    $connection = new mysqli($HOST, $USERNAME, $PASSWORD, $SERVERNAME);
+
+    $connection = new mysqli(HOST, USERNAME, PASSWORD, SERVERNAME);
 
     if ($connection->connect_error) {
         die("Connection Failed: " . $connection->connect_error);
@@ -20,12 +22,8 @@ function Query($sql) {
 }
 
 function isExist($id) {
-    $HOST = "127.0.0.1";
-    $USERNAME = "root";
-    $PASSWORD = "";
-    $SERVERNAME = "student_info";
 
-    $connection = new mysqli($HOST, $USERNAME, $PASSWORD, $SERVERNAME);
+    $connection = new mysqli(HOST, USERNAME, PASSWORD, SERVERNAME);
 
 
     if ($connection->connect_error) {
