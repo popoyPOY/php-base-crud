@@ -1,91 +1,170 @@
 <?php
-include './query.php';
+
+include 'query.php';
 
 
-class Request {
-     public function getStudents($name='') {
-          try {
-               if($name) {
-                    $query = "SELECT * FROM students WHERE first_name OR last_name LIKE '{$name}'";
+class Student extends Query {
 
-                    $data = Query($query)->fetch_all();
-     
-                    return $data;
-               }
-               else {
-                    $query = "SELECT * FROM students";
-                    $data = Query($query)->fetch_all();
+    function __construct() {
+        parent::__construct();
+    }
 
-                    return $data;
-               }
+    public function getStudents($id=0) {
+        try {
+            $doesExist = $this->doesExist($id)->{"num_rows"};
 
-          } catch (\Throwable $th) {
-               return $th;
-          }
-     }
+            #var_dump($doesExist->{"num_rows"});
+            
+            if ($doesExist) return $this->query("SELECT * FROM students1 WHERE id = {$id}")->fetch_all();  
+            
+            if ($doesExist == 0) return $this->query("SELECT * FROM students1")->fetch_all();      
+            
+            return "ID: {$id} does not exist";
+            
+        } catch (\Throwable $th) {
+            return $th;
+        }
 
-     public function addStudent($data) {
-          try {
-               $sql = "INSERT INTO students (id, school_id, first_name, middle_initial, last_name, birthday, gender, course, year) VALUES (NULL, {$data["school_id"]}, '{$data["first_name"]}', '{$data["middle_initial"]}', '{$data["last_name"]}', '{$data["birthday"]}', '{$data["gender"]}', '{$data["course"]}', '{$data["year"]}' )";
+    }
 
-               $query = Query($sql);
+    public function createStudents($data) {
 
-               if($query) {
-                   return $query;
-               } else
-               {
-                   return "Error"; 
-               }
+        try {
+            $sql = "INSERT INTO students1 (id, school_id, first_name, middle_initial, last_name, birthday, gender, course, year) VALUES (NULL, {$data["school_id"]}, '{$data["first_name"]}', '{$data["middle_initial"]}', '{$data["last_name"]}', '{$data["birthday"]}', '{$data["gender"]}', '{$data["course"]}', '{$data["year"]}' )";
 
-          } catch (\Throwable $th) {
-               throw $th;
-          }
+            $query = $this->query($sql);
 
-     }
+            if($query) return $query;
 
-     public function updateStudent($data) {
-          try {
-               $sql = "UPDATE `students` SET `school_id`='{$data["school_id"]}',`first_name`='{$data["first_name"]}',`middle_initial`='{$data["middle_initial"]}',`last_name`='{$data["last_name"]}',`birthday`='{$data["birthday"]}',`gender`='{$data["gender"]}',`course`='{$data["course"]}',`year`='{$data["year"]}' WHERE id={$data["id"]}";
+            
+            return "Error";
+            
+        } catch (\Throwable $th) {
+            return $th;
+        }
+    }
+
+
+    public function updateStudents($data) {
+
+        try {
+            $sql = "UPDATE `students1` SET `school_id`='{$data["school_id"]}',`first_name`='{$data["first_name"]}',`middle_initial`='{$data["middle_initial"]}',`last_name`='{$data["last_name"]}',`birthday`='{$data["birthday"]}',`gender`='{$data["gender"]}',`course`='{$data["course"]}',`year`='{$data["year"]}' WHERE id={$data["id"]}";
+
+            $doesExist = $this->doesExist($data["id"])->{"num_rows"};
     
-               $query = Query($sql);
+    
+            if($doesExist) return $this->query($sql);
+    
+            return "Error";
 
-               if($query) {
-                    return $query;
-                } else
-                {
-                    return "Error"; 
-                }
-               
-          } catch (\Throwable $th) {
-               throw $th;
-          }
+        } catch (\Throwable $th) {
+            return $th;
+        }
 
-     }
+    }
 
 
-     public function deleteStudent($id) {
-          try {
-               $sql = "DELETE FROM students WHERE id = {$id}";
-               if(Query($sql)) {
-                   return "DELETED";
-               }
-               else { 
-                   return "NOT DELETED";
-               }
-          } catch (\Throwable $th) {
-               throw $th;
-          }
-     }
+    public function deleteStudents($data) {
+        try {
+            $doesExist = $this->doesExist($data["id"])->{"num_rows"};
 
+            $id = $data["id"];
+            $sql = "DELETE FROM students1 WHERE id = {$id}";
+
+
+            if($doesExist) return $this->query($sql);
+
+            return "DOES NOT EXIST";
+
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+        
+    }
 }
 
 
-$json = file_get_contents('php://input');
+$student = new Student();
 
-$request = json_decode($json, true);
 
-$obj = new Request();
 
-$data = $obj->deleteStudent(3);
+if ($_SERVER["REQUEST_METHOD"] == "GET") {
+
+    if (count($_GET) != 0)
+    {
+
+        $param = $_GET["id"];
+        $information = $student->getStudents($param);
+
+
+        foreach($information as $row) {
+            echo "id: " . $row[0]. " - school_id: " . $row[1]. " " . $row[2]. " ".$row[3]." ".$row[4]." birthday: ".$row[5]." gender: ".$row[6]." course: ".$row[7]." year: ".$row[8]." <br>";
+        }
+    }
+    else 
+    {
+        $information = $student->getStudents();
+
+
+        foreach($information as $row) {
+            echo "id: " . $row[0]. " - school_id: " . $row[1]. " " . $row[2]. " ".$row[3]." ".$row[4]." birthday: ".$row[5]." gender: ".$row[6]." course: ".$row[7]." year: ".$row[8]." <br>";
+        }
+
+    }
+ 
+}
+ 
+ 
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $json = file_get_contents('php://input');
+    $data = json_decode($json, true);
+
+    if ($data) {
+        $sd = $student->createStudents($data);
+
+        echo "updated";
+    }
+    else {
+        return "Error";
+    }
+
+
+
+}
+ 
+ 
+if ($_SERVER["REQUEST_METHOD"] == "PUT") {
+    $json = file_get_contents('php://input');
+ 
+    $data = json_decode($json, true);
+
+    if ($data) {
+        $sd = $student->updateStudents($data);
+
+        echo "added";
+    }
+    else {
+        return "Error";
+    }
+
+}
+ 
+ 
+if ($_SERVER["REQUEST_METHOD"] == "DELETE") {
+    $json = file_get_contents('php://input');
+    $data = json_decode($json, true);
+
+
+    if ($data) {
+        $sd = $student->updateStudents($data);
+
+        echo "deleted";
+    }
+    else {
+        return "Error";
+    }
+
+
+}
 
 ?>

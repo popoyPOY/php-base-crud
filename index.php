@@ -24,7 +24,6 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
             echo "Not found";
         }
     }
- 
         else {
     
             $sql = "SELECT * FROM students";
